@@ -13,8 +13,11 @@ class _CadastroState extends State<Cadastro> {
   TextEditingController _controllerNome = TextEditingController();
   TextEditingController _controllerEmail = TextEditingController();
   TextEditingController _controllerSenha = TextEditingController();
+
   bool _tipoUsuario = false;
   String _msgErro = "";
+
+  FirebaseFirestore _db = FirebaseFirestore.instance;
 
   _validarCampos() {
     String nome = _controllerNome.text;
@@ -50,12 +53,11 @@ class _CadastroState extends State<Cadastro> {
 
   _cadastrarUsuario(Usuario usuario) {
     FirebaseAuth auth = FirebaseAuth.instance;
-    auth.createUserWithEmailAndPassword(
-        email: usuario.email,
-        password: usuario.senha
-    ).then((firebaseUser) {
-
-          FirebaseFirestore.instance
+    auth
+        .createUserWithEmailAndPassword(
+            email: usuario.email, password: usuario.senha)
+        .then((firebaseUser) {
+      _db
           .collection("usuarios")
           .doc(firebaseUser.user.uid)
           .set(usuario.toMap());
@@ -63,11 +65,11 @@ class _CadastroState extends State<Cadastro> {
       switch (usuario.tipoUsuario) {
         case "motorista":
           Navigator.pushNamedAndRemoveUntil(
-              context, "painel_motorista", (_) => false);
+              context, "/painel-motorista", (context) => false);
           break;
         case "passageiro":
           Navigator.pushNamedAndRemoveUntil(
-              context, "painel_passageiro", (_) => false);
+              context, "/painel-passageiro", (context) => false);
           break;
       }
     });

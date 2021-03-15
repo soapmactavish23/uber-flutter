@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
-import 'Cadastro.dart';
+import 'package:uber/model/Usuario.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -10,6 +10,47 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   TextEditingController _controllerEmail = TextEditingController();
   TextEditingController _controllerSenha = TextEditingController();
+  String _msgErro = "";
+
+  _validarCampos() {
+    String email = _controllerEmail.text;
+    String senha = _controllerSenha.text;
+
+    if (email.isNotEmpty && email.contains("@")) {
+      if (senha.length >= 6) {
+        Usuario usuario = Usuario();
+        usuario.email = email;
+        usuario.senha = senha;
+
+        _logarUsuario(usuario);
+      } else {
+        setState(() {
+          _msgErro = "A senha deve conter mais de 6 caracteres.";
+        });
+      }
+    } else {
+      setState(() {
+        _msgErro = "O E-mail deve conter '@'";
+      });
+    }
+  }
+
+  _logarUsuario(Usuario usuario) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+
+    auth
+        .signInWithEmailAndPassword(
+            email: usuario.email, password: usuario.senha)
+        .then((firebaseUser) {
+      Navigator.pushReplacementNamed(context, "/painel-passageiro");
+    }).catchError((error) {
+      print("Erro: ${error}");
+      setState(() {
+        _msgErro =
+            "Erro ao autenticar usuário, verifique e-mail e senha e tente novamente";
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +102,9 @@ class _HomeState extends State<Home> {
                 Padding(
                   padding: EdgeInsets.only(top: 16, bottom: 10),
                   child: RaisedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      _validarCampos();
+                    },
                     child: Text(
                       "Entrar",
                       style: TextStyle(color: Colors.white, fontSize: 20),
@@ -88,7 +131,7 @@ class _HomeState extends State<Home> {
                   padding: EdgeInsets.only(top: 16),
                   child: Center(
                     child: Text(
-                      "Erro",
+                      _msgErro,
                       style: TextStyle(color: Colors.red, fontSize: 20),
                     ),
                   ),

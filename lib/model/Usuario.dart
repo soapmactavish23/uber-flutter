@@ -1,6 +1,5 @@
 class Usuario{
 
-  String _idUsuario;
   String _nome;
   String _email;
   String _senha;
@@ -14,6 +13,7 @@ class Usuario{
       "email": this.email,
       "tipoUsuario": this.tipoUsuario
     };
+    return map;
   }
 
   String verificaTipoUsuario(bool tipoUsuario){
@@ -43,12 +43,5 @@ class Usuario{
   set nome(String value) {
     _nome = value;
   }
-
-  String get idUsuario => _idUsuario;
-
-  set idUsuario(String value) {
-    _idUsuario = value;
-  }
-
 
 }
