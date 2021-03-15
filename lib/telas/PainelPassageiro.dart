@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:uber/model/Destino.dart';
 
 class PainelPassageiro extends StatefulWidget {
   @override
@@ -12,6 +13,7 @@ class PainelPassageiro extends StatefulWidget {
 }
 
 class _PainelPassageiroState extends State<PainelPassageiro> {
+  TextEditingController _controllerDestino = TextEditingController();
   List<String> itensMenu = ["Configurações", "Deslogar"];
   Completer<GoogleMapController> _controller = Completer();
   CameraPosition _posicaoCamera =
@@ -85,6 +87,68 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
         _marcadores.add(marcadorPassageiro);
       });
     });
+  }
+
+  _chamarUber() async {
+    String enderecoDestino = _controllerDestino.text;
+
+    if (enderecoDestino.isNotEmpty) {
+      List<Location> locations =
+          await locationFromAddress(enderecoDestino);
+
+      if (locations != null && locations.length > 0) {
+        Location position = locations[0];
+
+        List<Placemark> listaEnderecos = await placemarkFromCoordinates(
+            position.latitude, locations[0].longitude);
+        if (listaEnderecos != null && listaEnderecos.length > 0) {
+          Placemark endereco = listaEnderecos[0];
+          Destino destino = Destino();
+          destino.cidade = endereco.administrativeArea;
+          destino.cep = endereco.postalCode;
+          destino.bairro = endereco.subLocality;
+          destino.rua = endereco.thoroughfare;
+          destino.numero = endereco.subThoroughfare;
+
+          destino.latitude = position.latitude;
+          destino.longitude = position.longitude;
+
+          String enderecoConfirmacao;
+          enderecoConfirmacao = "\n Cidade: ${destino.cidade}";
+          enderecoConfirmacao += "\n Rua: ${destino.rua}, ${destino.numero}";
+          enderecoConfirmacao += "\n Bairro: ${destino.bairro}";
+          enderecoConfirmacao += "\n Cep: ${destino.cep}";
+
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text("Confirmação do endereço"),
+                  content: Text(enderecoConfirmacao),
+                  contentPadding: EdgeInsets.all(16),
+                  actions: <Widget>[
+                    FlatButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          "Cancelar",
+                          style: TextStyle(color: Colors.red),
+                        )
+                    ),
+                    FlatButton(
+                        onPressed: (){
+
+                        },
+                        child: Text(
+                          "Confirmar",
+                          style: TextStyle(color: Colors.green),
+                        )
+                    ),
+                  ],
+                );
+              });
+        }
+      }
+    }
   }
 
   @override
@@ -170,6 +234,7 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
                           borderRadius: BorderRadius.circular(3),
                           color: Colors.white),
                       child: TextField(
+                        controller: _controllerDestino,
                         decoration: InputDecoration(
                             icon: Container(
                               margin: EdgeInsets.only(left: 20, bottom: 16),
@@ -193,7 +258,9 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
                   child: Padding(
                     padding: EdgeInsets.all(10),
                     child: RaisedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        _chamarUber();
+                      },
                       child: Text(
                         "CHAMAR UBER",
                         style: TextStyle(color: Colors.white, fontSize: 20),
