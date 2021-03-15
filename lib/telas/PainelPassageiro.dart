@@ -6,6 +6,10 @@ import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:uber/model/Destino.dart';
+import 'package:uber/model/Requisicao.dart';
+import 'package:uber/model/Usuario.dart';
+import 'package:uber/util/StatusRequisicao.dart';
+import 'package:uber/util/UsuarioFirebase.dart';
 
 class PainelPassageiro extends StatefulWidget {
   @override
@@ -136,7 +140,8 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
                     ),
                     FlatButton(
                         onPressed: (){
-
+                          _salvarRequisicao(destino);
+                          Navigator.pop(context);
                         },
                         child: Text(
                           "Confirmar",
@@ -149,6 +154,21 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
         }
       }
     }
+  }
+
+  _salvarRequisicao(Destino destino) async{
+
+    Usuario passageiro = await UsuarioFirebase.getDadosUsuarioLogado();
+
+    Requisicao requisicao = Requisicao();
+    requisicao.destino = destino;
+    requisicao.passageiro = passageiro;
+    requisicao.status = StatusRequisicao.AGUARDANDO;
+
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    db.collection("requisicoes").add(requisicao.toMap());
+
+
   }
 
   @override

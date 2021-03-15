@@ -1,5 +1,6 @@
 class Usuario{
 
+  String _idUsuario;
   String _nome;
   String _email;
   String _senha;
@@ -18,6 +19,13 @@ class Usuario{
 
   String verificaTipoUsuario(bool tipoUsuario){
     return tipoUsuario ? "motorista" : "passageiro";
+  }
+
+
+  String get idUsuario => _idUsuario;
+
+  set idUsuario(String value) {
+    _idUsuario = value;
   }
 
   String get tipoUsuario => _tipoUsuario;
