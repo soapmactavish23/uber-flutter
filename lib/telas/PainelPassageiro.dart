@@ -16,6 +16,7 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
   Completer<GoogleMapController> _controller = Completer();
   CameraPosition _posicaoCamera =
       CameraPosition(target: LatLng(-1.4430669411541555, -48.4590759598569));
+  Set<Marker> _marcadores = {};
 
   _escolhaMenuItem(String escolha) {
     switch (escolha) {
@@ -41,6 +42,7 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
     Geolocator.getPositionStream(desiredAccuracy: LocationAccuracy.high)
         .listen((Position position) {
       setState(() {
+        _exibirMarcadorPassageiro(position);
         _posicaoCamera = CameraPosition(
             target: LatLng(position.latitude, position.longitude), zoom: 16);
       });
@@ -52,6 +54,7 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
     Position position = await Geolocator.getLastKnownPosition();
     setState(() {
       if (position != null) {
+        _exibirMarcadorPassageiro(position);
         _posicaoCamera = CameraPosition(
             target: LatLng(position.latitude, position.longitude), zoom: 16);
         _movimentarCamera(_posicaoCamera);
@@ -63,6 +66,25 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
     GoogleMapController googleMapController = await _controller.future;
     googleMapController
         .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+  }
+
+  _exibirMarcadorPassageiro(Position local) async {
+    double pixelRatio = MediaQuery.of(context).devicePixelRatio;
+
+    BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(devicePixelRatio: pixelRatio),
+            "imagens/passageiro.png")
+        .then((BitmapDescriptor icone) {
+      Marker marcadorPassageiro = Marker(
+          markerId: MarkerId("marcador-passageiro"),
+          position: LatLng(local.latitude, local.longitude),
+          infoWindow: InfoWindow(title: "Meu local"),
+          icon: icone);
+
+      setState(() {
+        _marcadores.add(marcadorPassageiro);
+      });
+    });
   }
 
   @override
@@ -95,11 +117,12 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
                 mapType: MapType.normal,
                 initialCameraPosition: _posicaoCamera,
                 onMapCreated: _onMapCreated,
-                myLocationEnabled: true,
-                myLocationButtonEnabled: true,
+                //myLocationEnabled: true,
+                myLocationButtonEnabled: false,
+                markers: _marcadores,
               ),
               Positioned(
-                top: 0,
+                  top: 0,
                   left: 0,
                   right: 0,
                   child: Padding(
@@ -108,27 +131,29 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
                       height: 50,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey,),
-                        borderRadius: BorderRadius.circular(3),
-                        color: Colors.white
-                      ),
+                          border: Border.all(
+                            color: Colors.grey,
+                          ),
+                          borderRadius: BorderRadius.circular(3),
+                          color: Colors.white),
                       child: TextField(
                         readOnly: true,
                         decoration: InputDecoration(
-                          icon: Container(
-                            margin: EdgeInsets.only(left: 20, bottom: 16),
-                            width: 10,
-                            height: 10,
-                            child: Icon(Icons.location_on, color: Colors.green,),
-                          ),
-                          hintText: "Meu Local",
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.only(left: 15)
-                        ),
+                            icon: Container(
+                              margin: EdgeInsets.only(left: 20, bottom: 16),
+                              width: 10,
+                              height: 10,
+                              child: Icon(
+                                Icons.location_on,
+                                color: Colors.green,
+                              ),
+                            ),
+                            hintText: "Meu Local",
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.only(left: 15)),
                       ),
                     ),
-                  )
-              ),
+                  )),
               Positioned(
                   top: 55,
                   left: 0,
@@ -139,26 +164,28 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
                       height: 50,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey,),
+                          border: Border.all(
+                            color: Colors.grey,
+                          ),
                           borderRadius: BorderRadius.circular(3),
-                          color: Colors.white
-                      ),
+                          color: Colors.white),
                       child: TextField(
                         decoration: InputDecoration(
                             icon: Container(
                               margin: EdgeInsets.only(left: 20, bottom: 16),
                               width: 10,
                               height: 10,
-                              child: Icon(Icons.local_taxi, color: Colors.black,),
+                              child: Icon(
+                                Icons.local_taxi,
+                                color: Colors.black,
+                              ),
                             ),
                             hintText: "Digite Seu Destino",
                             border: InputBorder.none,
-                            contentPadding: EdgeInsets.only(left: 15)
-                        ),
+                            contentPadding: EdgeInsets.only(left: 15)),
                       ),
                     ),
-                  )
-              ),
+                  )),
               Positioned(
                   bottom: 0,
                   left: 0,
@@ -166,9 +193,7 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
                   child: Padding(
                     padding: EdgeInsets.all(10),
                     child: RaisedButton(
-                      onPressed: () {
-
-                      },
+                      onPressed: () {},
                       child: Text(
                         "CHAMAR UBER",
                         style: TextStyle(color: Colors.white, fontSize: 20),
@@ -176,8 +201,7 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
                       color: Color(0xff1ebbd8),
                       padding: EdgeInsets.fromLTRB(32, 16, 32, 16),
                     ),
-                  )
-              )
+                  ))
             ],
           ),
         ));
