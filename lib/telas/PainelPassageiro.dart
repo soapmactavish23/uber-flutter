@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PainelPassageiro extends StatefulWidget {
   @override
@@ -10,23 +11,19 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
   List<String> itensMenu = ["Configurações", "Deslogar"];
 
   _escolhaMenuItem(String escolha) {
-
-    switch(escolha){
+    switch (escolha) {
       case "Deslogar":
         _deslogarUsuario();
         break;
       case "Configurações":
         break;
     }
-
   }
 
-  _deslogarUsuario() async{
+  _deslogarUsuario() async {
     FirebaseAuth auth = FirebaseAuth.instance;
-
     await auth.signOut();
     Navigator.pushReplacementNamed(context, "/");
-
   }
 
   @override

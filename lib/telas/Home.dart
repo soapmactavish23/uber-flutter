@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:uber/model/Usuario.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -11,6 +12,7 @@ class _HomeState extends State<Home> {
   TextEditingController _controllerEmail = TextEditingController();
   TextEditingController _controllerSenha = TextEditingController();
   String _msgErro = "";
+  bool _carregando = false;
 
   _validarCampos() {
     String email = _controllerEmail.text;
@@ -35,21 +37,63 @@ class _HomeState extends State<Home> {
     }
   }
 
+  _redirecionaPainelPorTipoUsuario(String idUsuario) async {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    DocumentSnapshot snapshot =
+        await db.collection("usuarios").doc(idUsuario).get();
+
+    Map<String, dynamic> dados = snapshot.data();
+    String tipoUsuario = dados["tipoUsuario"];
+
+    setState(() {
+      _carregando = false;
+    });
+
+    switch (tipoUsuario) {
+      case "motorista":
+        Navigator.pushReplacementNamed(context, "/painel-motorista");
+        break;
+      case "passageiro":
+        Navigator.pushReplacementNamed(context, "/painel-passageiro");
+        break;
+    }
+  }
+
   _logarUsuario(Usuario usuario) {
+    setState(() {
+      _carregando = true;
+    });
+
     FirebaseAuth auth = FirebaseAuth.instance;
 
     auth
         .signInWithEmailAndPassword(
             email: usuario.email, password: usuario.senha)
         .then((firebaseUser) {
-      Navigator.pushReplacementNamed(context, "/painel-passageiro");
+      _redirecionaPainelPorTipoUsuario(firebaseUser.user.uid);
     }).catchError((error) {
       print("Erro: ${error}");
       setState(() {
         _msgErro =
             "Erro ao autenticar usuário, verifique e-mail e senha e tente novamente";
+        _carregando = false;
       });
     });
+  }
+
+  _verificaUsuarioLogado() async{
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User usuarioLogado = await auth.currentUser;
+    if(usuarioLogado != null){
+      String idUsuario = usuarioLogado.uid;
+      _redirecionaPainelPorTipoUsuario(idUsuario);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _verificaUsuarioLogado();
   }
 
   @override
@@ -127,6 +171,16 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                 ),
+                _carregando
+                    ? Padding(
+                        padding: EdgeInsets.only(top: 12),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            backgroundColor: Colors.white,
+                          ),
+                        ),
+                      )
+                    : Container(),
                 Padding(
                   padding: EdgeInsets.only(top: 16),
                   child: Center(
