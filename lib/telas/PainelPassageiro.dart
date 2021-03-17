@@ -168,7 +168,20 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
     requisicao.status = StatusRequisicao.AGUARDANDO;
 
     FirebaseFirestore db = FirebaseFirestore.instance;
-    db.collection("requisicoes").add(requisicao.toMap());
+
+    //Salvar requisicao
+    db.collection("requisicoes").doc(requisicao.id).set(requisicao.toMap());
+
+    //Salvar requisicao ativa
+    Map<String, dynamic> dadosRequisicaoAtiva = {};
+    dadosRequisicaoAtiva["id_requisicao"] = requisicao.id;
+    dadosRequisicaoAtiva["id_usuario"] = passageiro.idUsuario;
+    dadosRequisicaoAtiva["status"] = StatusRequisicao.AGUARDANDO;
+
+    db
+        .collection("requisicao_ativa")
+        .doc(passageiro.idUsuario)
+        .set(dadosRequisicaoAtiva);
 
     _statusAguardando();
   }
@@ -188,15 +201,45 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
     });
   }
 
-  _statusAguardando(){
+  _statusAguardando() {
     _exibirCaixaEnderecoDestino = false;
     _alterarBotaoPrincipal("CANCELAR", Colors.red, () {
       _cancelarUber();
     });
   }
 
-  _cancelarUber(){
+  _cancelarUber() {}
 
+  _adicionarListenerRequisaoAtiva() async {
+    User user = await UsuarioFirebase.getUsuarioAtual();
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    await db
+        .collection("requisicao_ativa")
+        .doc(user.uid)
+        .snapshots()
+        .listen((snapshot) {
+          print("dados requisição: ${snapshot.data().toString()}");
+          if(snapshot.data() != null){
+            Map<String, dynamic> dados = snapshot.data();
+            String status = dados["status"];
+            String idRequisicao = dados["id_requisicao"];
+
+            switch(status){
+              case StatusRequisicao.AGUARDANDO:
+                _statusAguardando();
+                break;
+              case StatusRequisicao.A_CAMINHO:
+                break;
+              case StatusRequisicao.FINALIZADA:
+                break;
+              case StatusRequisicao.VIAGEM:
+                break;
+            }
+
+          }else{
+            _statusUberNaoChamado();
+          }
+    });
   }
 
   @override
@@ -204,7 +247,8 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
     super.initState();
     _recuperarUltimalocalizacaoConhecida();
     _adicionarListenerLocalizacao();
-    _statusUberNaoChamado();
+
+    _adicionarListenerRequisaoAtiva();
   }
 
   @override
