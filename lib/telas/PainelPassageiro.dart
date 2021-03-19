@@ -24,6 +24,7 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
       CameraPosition(target: LatLng(-1.4430669411541555, -48.4590759598569));
   Set<Marker> _marcadores = {};
   String _idRequisicao;
+  Position _localPassageiro;
 
   //Controles para exibição na tela
   bool _exibirCaixaEnderecoDestino = true;
@@ -70,6 +71,9 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
         _exibirMarcadorPassageiro(position);
         _posicaoCamera = CameraPosition(
             target: LatLng(position.latitude, position.longitude), zoom: 16);
+        setState(() {
+          _localPassageiro = position;
+        });
         _movimentarCamera(_posicaoCamera);
       }
     });
@@ -162,6 +166,8 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
 
   _salvarRequisicao(Destino destino) async {
     Usuario passageiro = await UsuarioFirebase.getDadosUsuarioLogado();
+    passageiro.latitude = _localPassageiro.latitude;
+    passageiro.longitude = _localPassageiro.longitude;
 
     Requisicao requisicao = Requisicao();
     requisicao.destino = destino;
