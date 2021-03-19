@@ -209,6 +209,12 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
     });
   }
 
+  _statusACaminho() {
+    _exibirCaixaEnderecoDestino = false;
+    _exibirCaixaEnderecoDestino = false;
+    _alterarBotaoPrincipal("Motorista a caminho", Colors.grey, null);
+  }
+
   _cancelarUber() async {
     User user = await UsuarioFirebase.getUsuarioAtual();
     FirebaseFirestore db = FirebaseFirestore.instance;
@@ -238,6 +244,7 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
                 _statusAguardando();
                 break;
               case StatusRequisicao.A_CAMINHO:
+                _statusACaminho();
                 break;
               case StatusRequisicao.FINALIZADA:
                 break;

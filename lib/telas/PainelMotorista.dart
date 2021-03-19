@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uber/util/StatusRequisicao.dart';
+import 'package:uber/util/UsuarioFirebase.dart';
 
 class PainelMotorista extends StatefulWidget {
   @override
@@ -42,12 +43,26 @@ class _PainelMotoristaState extends State<PainelMotorista> {
     });
   }
 
+  _recuperarRequisicaoAtivaMotorista() async {
+    User user = await UsuarioFirebase.getUsuarioAtual();
+    DocumentSnapshot documentSnapshot =
+        await _db.collection("requisicao_ativa_motorista").doc(user.uid).get();
+
+    var dadosRequisicao = documentSnapshot.data();
+
+    if( dadosRequisicao == null ){
+      _adicionarListenerRequisicoes();
+    }else{
+      String idRequisicao = dadosRequisicao["id_requisicao"];
+      Navigator.pushReplacementNamed(context, "/corrida",
+          arguments: idRequisicao);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-
-    //adicionar listener para recuperar requisições
-    _adicionarListenerRequisicoes();
+    _recuperarRequisicaoAtivaMotorista();
   }
 
   @override
@@ -115,12 +130,9 @@ class _PainelMotoristaState extends State<PainelMotorista> {
                         return ListTile(
                           title: Text(nomePassageiro),
                           subtitle: Text("Destino: ${rua}, ${numero}"),
-                          onTap: (){
-                            Navigator.pushNamed(
-                              context,
-                              "/corrida",
-                              arguments: idRequisicao
-                            );
+                          onTap: () {
+                            Navigator.pushNamed(context, "/corrida",
+                                arguments: idRequisicao);
                           },
                         );
                       },
