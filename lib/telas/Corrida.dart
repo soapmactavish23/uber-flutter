@@ -53,7 +53,7 @@ class _CorridaState extends State<Corrida> {
           zoom: 16
       );
 
-      _movimentarCamera(_posicaoCamera);
+      //_movimentarCamera(_posicaoCamera);
 
       setState(() {
         _localMotorista = position;
@@ -69,7 +69,7 @@ class _CorridaState extends State<Corrida> {
         _exibirMarcadorPassageiro(position);
         _posicaoCamera = CameraPosition(
             target: LatLng(position.latitude, position.longitude), zoom: 16);
-        _movimentarCamera(_posicaoCamera);
+        //_movimentarCamera(_posicaoCamera);
 
         _localMotorista = position;
       }
@@ -152,11 +152,48 @@ class _CorridaState extends State<Corrida> {
     double latitudeMotorista = _dadosRequisicao["motorista"]["latitude"];
     double longitudeMotorista = _dadosRequisicao["motorista"]["longitude"];
 
+    //Exibir dois marcadores
     _exibirDoisMarcadores(
       LatLng(latitudeMotorista, longitudeMotorista),
       LatLng(latitudePassageiro, longitudePassageiro),
     );
+
+    var nLat, nLon, sLat, sLon;
+
+    if(latitudeMotorista <= latitudePassageiro){
+      sLat = latitudeMotorista;
+      nLat = latitudePassageiro;
+    }else{
+      sLat = latitudePassageiro;
+      nLat = latitudeMotorista;
+    }
+
+    if(longitudeMotorista <= longitudePassageiro){
+      sLon = longitudeMotorista;
+      nLon = longitudePassageiro;
+    }else{
+      sLon = longitudePassageiro;
+      nLon = longitudeMotorista;
+    }
+
+    _movimentarCameraBound(
+        LatLngBounds(
+          northeast: LatLng(nLat, nLon),
+          southwest: LatLng(sLat, sLon)
+        )
+    );
     
+  }
+
+  _movimentarCameraBound(LatLngBounds latLngBounds) async {
+    GoogleMapController googleMapController = await _controller.future;
+    googleMapController
+        .animateCamera(
+      CameraUpdate.newLatLngBounds(
+        latLngBounds,
+        100
+      )
+    );
   }
 
   _exibirDoisMarcadores(LatLng latLng1, LatLng latLng2){
@@ -191,10 +228,6 @@ class _CorridaState extends State<Corrida> {
 
     setState(() {
       _marcadores = _listaMarcadores;
-      _movimentarCamera(CameraPosition(
-        target: LatLng(latLng1.latitude, latLng1.longitude),
-        zoom: 18
-      ));
     });
 
   }
