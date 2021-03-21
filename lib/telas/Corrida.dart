@@ -28,7 +28,10 @@ class _CorridaState extends State<Corrida> {
   String _textoBotao = "ACEITAR CORRIDA";
   Color _corBotao = Color(0xff1ebbd8);
   Function _funcaoBotao;
-  String _mensagemStatus;
+  String _mensagemStatus = "";
+  String _idRequisicao;
+  Position _localMotorista;
+  String _statusRequisicao = StatusRequisicao.AGUARDANDO;
 
   _alterarBotaoPrincipal(String texto, Color cor, Function funcao) {
     setState(() {
@@ -47,7 +50,22 @@ class _CorridaState extends State<Corrida> {
         .listen((Position position) {
           if(position != null){
 
+            if (_idRequisicao != null && _idRequisicao.isNotEmpty) {
 
+              if(_statusRequisicao != StatusRequisicao.AGUARDANDO){
+                //Atualizar local motorista
+                UsuarioFirebase.atualizarDadosLocalizacao(
+                    _idRequisicao,
+                    position.latitude,
+                    position.longitude
+                );
+              }else {
+                setState(() {
+                  _localMotorista = position;
+                });
+                _statusAguardando();
+              }
+            }
 
           }
     });
@@ -96,18 +114,21 @@ class _CorridaState extends State<Corrida> {
   _adicionarListenerRequisicao() async {
 
     FirebaseFirestore db = FirebaseFirestore.instance;
-    String idRequisicao = _dadosRequisicao["id"];
     await db.collection("requisicoes")
-        .doc( idRequisicao ).snapshots().listen((snapshot){
+        .doc( _idRequisicao ).snapshots().listen((snapshot){
 
       if( snapshot.data() != null ){
 
-        _dadosRequisicao = snapshot.data();
+        setState(() {
+          _dadosRequisicao = snapshot.data();
+        });
 
         Map<String, dynamic> dados = snapshot.data();
-        String status = dados["status"];
+        setState(() {
+          _statusRequisicao = dados["status"];
+        });
 
-        switch( status ){
+        switch( _statusRequisicao ){
           case StatusRequisicao.AGUARDANDO :
             _statusAguardando();
             break;
@@ -134,8 +155,9 @@ class _CorridaState extends State<Corrida> {
       _aceitarCorrida();
     });
 
-    double motoristaLat = _dadosRequisicao["motorista"]["latitude"];
-    double motoristaLng = _dadosRequisicao["motorista"]["longitude"];
+    double motoristaLat = _localMotorista.latitude;
+    double motoristaLng = _localMotorista.longitude;
+
     Position position =
         Position(latitude: motoristaLat, longitude: motoristaLng);
     _exibirMarcador(position, "imagens/motorista.png", "Motorista");
@@ -229,13 +251,13 @@ class _CorridaState extends State<Corrida> {
 
   _aceitarCorrida() async {
     Usuario motorista = await UsuarioFirebase.getDadosUsuarioLogado();
-    motorista.latitude = _dadosRequisicao["motorista"]["latitude"];
-    motorista.longitude = _dadosRequisicao["motorista"]["longitude"];
+
+    motorista.latitude = _localMotorista.latitude;
+    motorista.longitude = _localMotorista.longitude;
 
     FirebaseFirestore db = FirebaseFirestore.instance;
-    String idRequisicao = _dadosRequisicao["id"];
 
-    db.collection("requisicoes").doc(idRequisicao).update({
+    db.collection("requisicoes").doc(_idRequisicao).update({
       "motorista": motorista.toMap(),
       "status": StatusRequisicao.A_CAMINHO
     }).then((_) {
@@ -249,7 +271,7 @@ class _CorridaState extends State<Corrida> {
       //Salvar requisicao ativa para motorista
       String idMotorista = motorista.idUsuario;
       db.collection("requisicao_ativa_motorista").doc(idMotorista).set({
-        "id_requisicao": idRequisicao,
+        "id_requisicao": _idRequisicao,
         "id_usuario": idMotorista,
         "status": StatusRequisicao.A_CAMINHO
       });
@@ -259,6 +281,8 @@ class _CorridaState extends State<Corrida> {
   @override
   void initState() {
     super.initState();
+
+    _idRequisicao = widget.idRequisicao;
     //adicionar listener para mudanças na requisicao
     _adicionarListenerRequisicao();
     //_recuperarUltimalocalizacaoConhecida();
