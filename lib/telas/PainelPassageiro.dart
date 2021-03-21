@@ -68,13 +68,7 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
     Position position = await Geolocator.getLastKnownPosition();
     setState(() {
       if (position != null) {
-        _exibirMarcadorPassageiro(position);
-        _posicaoCamera = CameraPosition(
-            target: LatLng(position.latitude, position.longitude), zoom: 16);
-        setState(() {
-          _localPassageiro = position;
-        });
-        _movimentarCamera(_posicaoCamera);
+
       }
     });
   }
@@ -225,52 +219,65 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
     User user = await UsuarioFirebase.getUsuarioAtual();
     FirebaseFirestore db = FirebaseFirestore.instance;
 
-    db.collection("requisicoes").doc(_idRequisicao).update({
-      "status": StatusRequisicao.CANCELADA
-    }).then((_){
+    db
+        .collection("requisicoes")
+        .doc(_idRequisicao)
+        .update({"status": StatusRequisicao.CANCELADA}).then((_) {
       db.collection("requisicao_ativa").doc(user.uid).delete();
     });
   }
 
-  _adicionarListenerRequisaoAtiva() async {
+  _recuperarRequisicaoAtiva() async {
     User user = await UsuarioFirebase.getUsuarioAtual();
     FirebaseFirestore db = FirebaseFirestore.instance;
+    DocumentSnapshot documentSnapshot =
+        await db.collection("requisicao_ativa").doc(user.uid).get();
+
+    if (documentSnapshot.data() != null) {
+      Map<String, dynamic> dados = documentSnapshot.data();
+      setState(() {
+        _idRequisicao = dados["id_requicao"];
+      });
+      _adicionarListenerRequisicao(_idRequisicao);
+    } else {
+      _statusUberNaoChamado();
+    }
+  }
+
+  _adicionarListenerRequisicao(String idRequisicao) async {
+    FirebaseFirestore db = FirebaseFirestore.instance;
     await db
-        .collection("requisicao_ativa")
-        .doc(user.uid)
+        .collection("requisicoes")
+        .doc(idRequisicao)
         .snapshots()
         .listen((snapshot) {
-          if(snapshot.data() != null){
-            Map<String, dynamic> dados = snapshot.data();
-            String status = dados["status"];
-            _idRequisicao = dados["id_requisicao"];
+      if (snapshot.data() != null) {
+        Map<String, dynamic> dados = snapshot.data();
+        String status = dados["status"];
+        _idRequisicao = dados["id_requisicao"];
 
-            switch(status){
-              case StatusRequisicao.AGUARDANDO:
-                _statusAguardando();
-                break;
-              case StatusRequisicao.A_CAMINHO:
-                _statusACaminho();
-                break;
-              case StatusRequisicao.FINALIZADA:
-                break;
-              case StatusRequisicao.VIAGEM:
-                break;
-            }
-
-          }else{
-            _statusUberNaoChamado();
-          }
+        switch (status) {
+          case StatusRequisicao.AGUARDANDO:
+            _statusAguardando();
+            break;
+          case StatusRequisicao.A_CAMINHO:
+            _statusACaminho();
+            break;
+          case StatusRequisicao.FINALIZADA:
+            break;
+          case StatusRequisicao.VIAGEM:
+            break;
+        }
+      }
     });
   }
 
   @override
   void initState() {
     super.initState();
+    _recuperarRequisicaoAtiva();
     _recuperarUltimalocalizacaoConhecida();
     _adicionarListenerLocalizacao();
-
-    _adicionarListenerRequisaoAtiva();
   }
 
   @override
