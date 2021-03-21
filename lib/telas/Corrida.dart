@@ -46,7 +46,9 @@ class _CorridaState extends State<Corrida> {
     Geolocator.getPositionStream(desiredAccuracy: LocationAccuracy.high)
         .listen((Position position) {
           if(position != null){
-            //Atualizar localização em tempo real
+
+
+
           }
     });
   }
@@ -92,33 +94,39 @@ class _CorridaState extends State<Corrida> {
   }
 
   _adicionarListenerRequisicao() async {
+
     FirebaseFirestore db = FirebaseFirestore.instance;
     String idRequisicao = _dadosRequisicao["id"];
-    await db
-        .collection("requisicoes")
-        .doc(idRequisicao)
-        .snapshots()
-        .listen((snapshot) {
-      if (snapshot.data() != null) {
+    await db.collection("requisicoes")
+        .doc( idRequisicao ).snapshots().listen((snapshot){
+
+      if( snapshot.data() != null ){
+
         _dadosRequisicao = snapshot.data();
 
         Map<String, dynamic> dados = snapshot.data();
         String status = dados["status"];
 
-        switch (status) {
-          case StatusRequisicao.AGUARDANDO:
+        switch( status ){
+          case StatusRequisicao.AGUARDANDO :
             _statusAguardando();
             break;
-          case StatusRequisicao.A_CAMINHO:
+          case StatusRequisicao.A_CAMINHO :
             _statusACaminho();
             break;
-          case StatusRequisicao.FINALIZADA:
+          case StatusRequisicao.VIAGEM :
+
             break;
-          case StatusRequisicao.VIAGEM:
+          case StatusRequisicao.FINALIZADA :
+
             break;
+
         }
+
       }
+
     });
+
   }
 
   _statusAguardando() {
@@ -253,7 +261,7 @@ class _CorridaState extends State<Corrida> {
     super.initState();
     //adicionar listener para mudanças na requisicao
     _adicionarListenerRequisicao();
-    _recuperarUltimalocalizacaoConhecida();
+    //_recuperarUltimalocalizacaoConhecida();
     _adicionarListenerLocalizacao();
   }
 

@@ -25,6 +25,7 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
   Set<Marker> _marcadores = {};
   String _idRequisicao;
   Position _localPassageiro;
+  Map<String, dynamic> _dadosRequisicao;
 
   //Controles para exibição na tela
   bool _exibirCaixaEnderecoDestino = true;
@@ -55,12 +56,18 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
   _adicionarListenerLocalizacao() {
     Geolocator.getPositionStream(desiredAccuracy: LocationAccuracy.high)
         .listen((Position position) {
-      setState(() {
-        _exibirMarcadorPassageiro(position);
-        _posicaoCamera = CameraPosition(
-            target: LatLng(position.latitude, position.longitude), zoom: 16);
-      });
-      _movimentarCamera(_posicaoCamera);
+      if (_idRequisicao != null && _idRequisicao.isNotEmpty) {
+        //Atualizar local passageiro
+        UsuarioFirebase.atualizarDadosLocalizacao(
+            _idRequisicao,
+            position.latitude,
+            position.longitude
+        );
+      } else if (position != null) {
+        setState(() {
+          _localPassageiro = position;
+        });
+      }
     });
   }
 
@@ -68,7 +75,12 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
     Position position = await Geolocator.getLastKnownPosition();
     setState(() {
       if (position != null) {
+        _exibirMarcadorPassageiro(position);
 
+        _posicaoCamera = CameraPosition(
+            target: LatLng(position.latitude, position.longitude), zoom: 19);
+        _localPassageiro = position;
+        _movimentarCamera(_posicaoCamera);
       }
     });
   }
@@ -200,6 +212,16 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
     _alterarBotaoPrincipal("CHAMAR UBER", Color(0xff1ebbd8), () {
       _chamarUber();
     });
+
+    Position position = Position(
+        latitude: _localPassageiro.latitude,
+        longitude: _localPassageiro.longitude);
+    _exibirMarcadorPassageiro(position);
+
+    CameraPosition cameraPosition = CameraPosition(
+        target: LatLng(position.latitude, position.longitude), zoom: 16);
+
+    _movimentarCamera(cameraPosition);
   }
 
   _statusAguardando() {
@@ -207,6 +229,20 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
     _alterarBotaoPrincipal("CANCELAR", Colors.red, () {
       _cancelarUber();
     });
+    print("${_dadosRequisicao["passageiro"]}");
+    double passageiroLat = _dadosRequisicao["passageiro"]["latitude"];
+    double passageiroLon = _dadosRequisicao["passageiro"]["longitude"];
+
+    Position position = Position(
+        latitude: passageiroLat,
+        longitude: passageiroLon
+    );
+    _exibirMarcadorPassageiro(position);
+
+    CameraPosition cameraPosition = CameraPosition(
+        target: LatLng(position.latitude, position.longitude), zoom: 16);
+
+    _movimentarCamera(cameraPosition);
   }
 
   _statusACaminho() {
@@ -236,7 +272,7 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
     if (documentSnapshot.data() != null) {
       Map<String, dynamic> dados = documentSnapshot.data();
       setState(() {
-        _idRequisicao = dados["id_requicao"];
+        _idRequisicao = dados["id_requisicao"];
       });
       _adicionarListenerRequisicao(_idRequisicao);
     } else {
@@ -253,6 +289,7 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
         .listen((snapshot) {
       if (snapshot.data() != null) {
         Map<String, dynamic> dados = snapshot.data();
+        _dadosRequisicao = dados;
         String status = dados["status"];
         _idRequisicao = dados["id_requisicao"];
 
@@ -276,7 +313,7 @@ class _PainelPassageiroState extends State<PainelPassageiro> {
   void initState() {
     super.initState();
     _recuperarRequisicaoAtiva();
-    _recuperarUltimalocalizacaoConhecida();
+    //_recuperarUltimalocalizacaoConhecida();
     _adicionarListenerLocalizacao();
   }
 
