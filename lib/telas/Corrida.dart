@@ -48,26 +48,21 @@ class _CorridaState extends State<Corrida> {
   _adicionarListenerLocalizacao() {
     Geolocator.getPositionStream(desiredAccuracy: LocationAccuracy.high)
         .listen((Position position) {
-          if(position != null){
+      if (position != null) {
+        if (_idRequisicao != null && _idRequisicao.isNotEmpty) {
+          if (_statusRequisicao != StatusRequisicao.AGUARDANDO) {
+            //Atualizar local motorista
+            UsuarioFirebase.atualizarDadosLocalizacao(
+                _idRequisicao, position.latitude, position.longitude);
 
-            if (_idRequisicao != null && _idRequisicao.isNotEmpty) {
-
-              if(_statusRequisicao != StatusRequisicao.AGUARDANDO){
-                //Atualizar local motorista
-                UsuarioFirebase.atualizarDadosLocalizacao(
-                    _idRequisicao,
-                    position.latitude,
-                    position.longitude
-                );
-              }else {
-                setState(() {
-                  _localMotorista = position;
-                });
-                _statusAguardando();
-              }
-            }
-
+          } else {
+            setState(() {
+              _localMotorista = position;
+            });
+            _statusAguardando();
           }
+        }
+      }
     });
   }
 
@@ -112,13 +107,13 @@ class _CorridaState extends State<Corrida> {
   }
 
   _adicionarListenerRequisicao() async {
-
     FirebaseFirestore db = FirebaseFirestore.instance;
-    await db.collection("requisicoes")
-        .doc( _idRequisicao ).snapshots().listen((snapshot){
-
-      if( snapshot.data() != null ){
-
+    await db
+        .collection("requisicoes")
+        .doc(_idRequisicao)
+        .snapshots()
+        .listen((snapshot) {
+      if (snapshot.data() != null) {
         setState(() {
           _dadosRequisicao = snapshot.data();
         });
@@ -128,26 +123,20 @@ class _CorridaState extends State<Corrida> {
           _statusRequisicao = dados["status"];
         });
 
-        switch( _statusRequisicao ){
-          case StatusRequisicao.AGUARDANDO :
+        switch (_statusRequisicao) {
+          case StatusRequisicao.AGUARDANDO:
             _statusAguardando();
             break;
-          case StatusRequisicao.A_CAMINHO :
+          case StatusRequisicao.A_CAMINHO:
             _statusACaminho();
             break;
-          case StatusRequisicao.VIAGEM :
-
+          case StatusRequisicao.VIAGEM:
             break;
-          case StatusRequisicao.FINALIZADA :
-
+          case StatusRequisicao.FINALIZADA:
             break;
-
         }
-
       }
-
     });
-
   }
 
   _statusAguardando() {
@@ -155,25 +144,28 @@ class _CorridaState extends State<Corrida> {
       _aceitarCorrida();
     });
 
-    double motoristaLat = _localMotorista.latitude;
-    double motoristaLng = _localMotorista.longitude;
+    if(_localMotorista != null){
+      double motoristaLat = _localMotorista.latitude;
+      double motoristaLng = _localMotorista.longitude;
 
-    Position position =
-        Position(latitude: motoristaLat, longitude: motoristaLng);
-    _exibirMarcador(position, "imagens/motorista.png", "Motorista");
+      Position position =
+      Position(latitude: motoristaLat, longitude: motoristaLng);
+      _exibirMarcador(position, "imagens/motorista.png", "Motorista");
 
-    CameraPosition cameraPosition = CameraPosition(
-        target: LatLng(position.latitude, position.longitude), zoom: 16);
+      CameraPosition cameraPosition = CameraPosition(
+          target: LatLng(position.latitude, position.longitude), zoom: 16);
 
-    _movimentarCamera(cameraPosition);
+      _movimentarCamera(cameraPosition);
+    }
   }
 
   _statusACaminho() {
     setState(() {
       _mensagemStatus = "A caminho do passageiro";
     });
-    _alterarBotaoPrincipal(
-        "Iniciar Corrida", Color(0xff1ebbd8), _iniciarCorrida());
+    _alterarBotaoPrincipal("Iniciar Corrida", Color(0xff1ebbd8), () {
+      _iniciarCorrida();
+    });
     double latitudePassageiro = _dadosRequisicao["passageiro"]["latitude"];
     double longitudePassageiro = _dadosRequisicao["passageiro"]["longitude"];
 
@@ -208,7 +200,28 @@ class _CorridaState extends State<Corrida> {
         northeast: LatLng(nLat, nLon), southwest: LatLng(sLat, sLon)));
   }
 
-  _iniciarCorrida() {}
+  _iniciarCorrida() {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    db.collection("requisicoes").doc(_idRequisicao).update({
+      "origem": {
+        "latitude": _dadosRequisicao["motorista"]["latitude"],
+        "longitude": _dadosRequisicao["motorista"]["longitude"]
+      },
+      "status": StatusRequisicao.VIAGEM
+    });
+
+    String idPassageiro = _dadosRequisicao["passageiro"]["idUsuario"];
+    db
+        .collection("requisicao_ativa")
+        .doc(idPassageiro)
+        .update({"status": StatusRequisicao.VIAGEM});
+
+    String idMotorista = _dadosRequisicao["motorista"]["idUsuario"];
+    db
+        .collection("requisicao_ativa_motorista")
+        .doc(idMotorista)
+        .update({"status": StatusRequisicao.VIAGEM});
+  }
 
   _movimentarCameraBound(LatLngBounds latLngBounds) async {
     GoogleMapController googleMapController = await _controller.future;
