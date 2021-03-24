@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:uber/model/Usuario.dart';
 import 'package:uber/util/StatusRequisicao.dart';
 import 'package:uber/util/UsuarioFirebase.dart';
@@ -54,7 +55,6 @@ class _CorridaState extends State<Corrida> {
             //Atualizar local motorista
             UsuarioFirebase.atualizarDadosLocalizacao(
                 _idRequisicao, position.latitude, position.longitude);
-
           } else {
             setState(() {
               _localMotorista = position;
@@ -134,6 +134,7 @@ class _CorridaState extends State<Corrida> {
             _statusEmViagem();
             break;
           case StatusRequisicao.FINALIZADA:
+            _statusFinalizada();
             break;
         }
       }
@@ -145,12 +146,12 @@ class _CorridaState extends State<Corrida> {
       _aceitarCorrida();
     });
 
-    if(_localMotorista != null){
+    if (_localMotorista != null) {
       double motoristaLat = _localMotorista.latitude;
       double motoristaLng = _localMotorista.longitude;
 
       Position position =
-      Position(latitude: motoristaLat, longitude: motoristaLng);
+          Position(latitude: motoristaLat, longitude: motoristaLng);
       _exibirMarcador(position, "imagens/motorista.png", "Motorista");
 
       CameraPosition cameraPosition = CameraPosition(
@@ -201,9 +202,57 @@ class _CorridaState extends State<Corrida> {
         northeast: LatLng(nLat, nLon), southwest: LatLng(sLat, sLon)));
   }
 
-  _finalizarCorrida(){
+  _finalizarCorrida() {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    db
+        .collection("requisicoes")
+        .doc(_idRequisicao)
+        .update({"status": StatusRequisicao.FINALIZADA});
 
+    String idPassageiro = _dadosRequisicao["passageiro"]["idUsuario"];
+    db
+        .collection("requisicao_ativa")
+        .doc(idPassageiro)
+        .update({"status": StatusRequisicao.FINALIZADA});
+
+    String idMotorista = _dadosRequisicao["motorista"]["idUsuario"];
+    db
+        .collection("requisicao_ativa_motorista")
+        .doc(idMotorista)
+        .update({"status": StatusRequisicao.FINALIZADA});
   }
+
+  _statusFinalizada() async {
+    //Calcular valor da corrida
+    double latitudeDestino = _dadosRequisicao["destino"]["latitude"];
+    double longitudeDestino = _dadosRequisicao["destino"]["longitude"];
+
+    double latitudeOrigem = _dadosRequisicao["origem"]["latitude"];
+    double longitudeOrigem = _dadosRequisicao["origem"]["longitude"];
+
+    double distanciaEmMetros = await Geolocator.distanceBetween(
+        latitudeOrigem, longitudeOrigem, latitudeDestino, longitudeDestino);
+
+    //Converter para km
+    double distanciaKm = distanciaEmMetros / 1000;
+
+    //8 é o valor cobrado por KM
+    double valorViagem = distanciaKm * 8;
+
+    //Formatar valor viagem
+    var f = new NumberFormat("#,##0.00", "pt_BR");
+    var valorViagemFormatado = f.format(valorViagem);
+
+    setState(() {
+      _mensagemStatus = "Viagem Finalizada";
+    });
+    _alterarBotaoPrincipal(
+        "Confirmar - R\$ ${valorViagemFormatado}", Color(0xff1ebbd8), () {
+      _confirmarCorrida();
+    });
+  }
+
+  _confirmarCorrida() {}
 
   _statusEmViagem() {
     setState(() {
