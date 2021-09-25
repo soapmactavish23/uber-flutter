@@ -30,7 +30,8 @@ As seguintes ferramentas foram usadas na construção do projeto:
 
 <h3>🖥️ Plataforma adotada</h3>
 
-  - Web
+  - Android;
+  - iOS;
 
 <h3> 📸 Screenshot</h3>
 
