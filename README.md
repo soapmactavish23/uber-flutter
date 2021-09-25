@@ -24,11 +24,10 @@
 
 As seguintes ferramentas foram usadas na construção do projeto:
 
-- [Vuejs](https://vuejs.org/)
-- [JavaScript](https://developer.mozilla.org/pt-BR/docs/Web/JavaScript)
-- [HTML5](https://developer.mozilla.org/pt-BR/docs/Web/HTML)
+- <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flutter/flutter-original.svg" height="20" width="20"/> [Flutter](https://vuejs.org/)
+- <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dart/dart-original.svg" height="20" width="20"/> [Dart](https://developer.mozilla.org/pt-BR/docs/Web/JavaScript)
 
-<h3>🖥️ Plataforma adotada</h3>
+<h3>📱 Plataforma adotada</h3>
 
   - Android;
   - iOS;
