@@ -11,10 +11,19 @@
 - <h3>Passageiro:</h3>
   
   - [x] Login
+  - [x] Cadastro
+  - [x] Painel do Passageiro
+  - [x] Confirmação de Corrida
+  - [x] Cancelar Corrida
 
 - <h3>Motorista:</h3>
   
   - [x] Login
+  - [x] Cadastro
+  - [x] Painel Motorista
+  - [x] Iniciar Corrida
+  - [x] Finalizar Corrida
+  - [x] Confirmar Pagamento
 
 <h3>📚 Descrição</h3>
   
@@ -35,29 +44,17 @@ As seguintes ferramentas foram usadas na construção do projeto:
 <h3> 📸 Screenshot</h3>
 
 <p float="left">
-	<img src="https://firebasestorage.googleapis.com/v0/b/apostas-e1af2.appspot.com/o/vuejs%2Fstock-trader%2Finicio.PNG?alt=media&token=1fd82755-50ef-42c7-9e97-6e3690ff20a1" width="450">
-	<img src="https://firebasestorage.googleapis.com/v0/b/apostas-e1af2.appspot.com/o/vuejs%2Fstock-trader%2Facoes.PNG?alt=media&token=c8ddf537-a87c-42b3-8d82-298d282d2c72" width="450">
+	<img src="https://firebasestorage.googleapis.com/v0/b/apostas-e1af2.appspot.com/o/flutter%2Fuber%2FLogin.PNG?alt=media&token=20d6430e-ea63-4b4e-aed1-30255f806660" width="200">
+	<img src="https://firebasestorage.googleapis.com/v0/b/apostas-e1af2.appspot.com/o/flutter%2Fuber%2FCadastro.PNG?alt=media&token=8e2b3f38-beb6-454b-837f-857ad321cba6" width="200">
+	<img src="https://firebasestorage.googleapis.com/v0/b/apostas-e1af2.appspot.com/o/flutter%2Fuber%2FPainel%20Passageiro.PNG?alt=media&token=a3709cea-eec6-4136-b245-f33a7c95a2ee" width="200">
+	<img src="https://firebasestorage.googleapis.com/v0/b/apostas-e1af2.appspot.com/o/flutter%2Fuber%2FConfirma%C3%A7%C3%A3o%20de%20Passageiro.PNG?alt=media&token=3c5b079b-20cc-4ea4-8743-a21d68f63b63" width="200">
+	<img src="https://firebasestorage.googleapis.com/v0/b/apostas-e1af2.appspot.com/o/flutter%2Fuber%2FCancelar%20Requisi%C3%A7%C3%A3o.PNG?alt=media&token=bcf13d2f-cd80-4378-ba33-297bb3651a3f" width="200">
+	<img src="https://firebasestorage.googleapis.com/v0/b/apostas-e1af2.appspot.com/o/flutter%2Fuber%2FPainel%20Motorista.PNG?alt=media&token=7765f4a2-ece9-4245-9e5a-2fc9baf11660" width="200">
+	<img src="https://firebasestorage.googleapis.com/v0/b/apostas-e1af2.appspot.com/o/flutter%2Fuber%2FIniciar%20Corrida.PNG?alt=media&token=83f77ba0-e29a-4f65-98e5-a9d76efe73ac" width="200">
+	<img src="https://firebasestorage.googleapis.com/v0/b/apostas-e1af2.appspot.com/o/flutter%2Fuber%2FFinalizar%20Corrida.PNG?alt=media&token=f3e18d10-2b97-449d-b4a2-9e499b248d89" width="200">
+	<img src="https://firebasestorage.googleapis.com/v0/b/apostas-e1af2.appspot.com/o/flutter%2Fuber%2FConfirmar%20Pagamento.PNG?alt=media&token=ceb99f25-9781-47b1-8bc5-d8fd9b4f684f" width="200">
 </p>
-
-<h3> 📷 Video Demonstrativo:</h3>
-
-<div>
-<a href="https://youtu.be/FBkyWo_V6Yo" target="_blank"><img src="https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" target="_blank"></a>
-</div>
 
 <h3>📥 Download</h3>
 
   - [Android](https://drive.google.com/file/d/1uWX1RvPqT_28ssuNa3A0bczk60ai0mhy/view?usp=sharing)
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
