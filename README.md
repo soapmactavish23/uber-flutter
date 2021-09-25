@@ -16,7 +16,7 @@
   
   - [x] Login
 
-<h3>Descrição</h3>
+<h3>📚 Descrição</h3>
   
   - Uber clone, desenvolvido em flutter
 
