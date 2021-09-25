@@ -45,6 +45,10 @@ As seguintes ferramentas foram usadas na construção do projeto:
 <a href="https://youtu.be/FBkyWo_V6Yo" target="_blank"><img src="https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" target="_blank"></a>
 </div>
 
+<h3>📥 Download</h3>
+
+  - [Android](https://drive.google.com/file/d/1ef5Lqj3LAs_-NrXqqBft9wzn6FsCANYl/view?usp=sharing)
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
