@@ -61,6 +61,6 @@ As seguintes ferramentas foram usadas na construção do projeto:
 	<img src="https://firebasestorage.googleapis.com/v0/b/apostas-e1af2.appspot.com/o/flutter%2Fuber%2FConfirmar%20Pagamento.PNG?alt=media&token=ceb99f25-9781-47b1-8bc5-d8fd9b4f684f" width="200">
 </p>
 
-<h3>📥 Download</h3>
+## 📥 Download
 
   - [Android](https://drive.google.com/file/d/1uWX1RvPqT_28ssuNa3A0bczk60ai0mhy/view?usp=sharing)
